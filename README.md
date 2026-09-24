@@ -89,11 +89,11 @@ The service worker caches the app shell, icons, and bundled vocabulary after a s
 
 New versions wait. **Update & reopen** is enabled only from the talking screen with an empty message. Nothing automatically reloads during composition. Closing all app windows may let a waiting version activate on the next opening. Save a backup before major updates. Do not use a downloaded HTML file opened in Files to install this app.
 
-## Publish to GitHub Pages when authorized
+## GitHub Pages deployment
 
-No deployment has been performed. The workflow has **no push trigger**. A manual workflow run defaults to checks only, with publication unchecked.
+The app is live at [My Words](https://robertchang-ga.github.io/my-words/). The workflow has **no push trigger**. A manual workflow run defaults to checks only, with publication unchecked.
 
-When publication is authorized:
+For a new deployment or another repository:
 
 1. Create/select a GitHub repository and push only source, lockfile, docs and generic app icons.
 2. In repository **Settings → Pages → Build and deployment**, choose **GitHub Actions**. Ensure Actions are enabled. Review the `github-pages` environment's allowed branches and any required reviewers.
@@ -131,4 +131,5 @@ Close any existing port-4173 preview before subpath testing. `test:subpath` buil
 See [test report](docs/TEST-REPORT.md) and [physical iPhone checklist](docs/IPHONE-CHECKLIST.md). Desktop emulation and desktop WebKit are not proof of iPhone speech reliability or VoiceOver usability.
 
 Source structure: `App.tsx` communication; `Settings.tsx` personalization; `grammar.ts` templates; `speech.ts` platform lifecycle; `data.ts` persistence/backup; `photos.ts` and `imageValidation.ts` raster handling; `pwa.ts` worker status; `vite.config.ts` manifest/precache generation. Icons can be regenerated on Windows with `scripts/generate-icons.ps1`.
+
 

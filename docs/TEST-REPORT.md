@@ -1,6 +1,6 @@
 # Validation report
 
-Tested locally on Windows on September 24, 2026, with Node 22.18.0. No external deployment or physical iPhone testing was performed.
+Tested locally on Windows on September 24, 2026, with Node 22.18.0. Published to GitHub Pages on September 24, 2026. Physical iPhone testing is pending.
 
 | Check | Result |
 | --- | --- |
@@ -23,8 +23,9 @@ Automated coverage includes:
 - Local setup tests verify localhost-only loading, validated persistence, once-only application, and save failure recovery. Private setup was also checked in Chromium and WebKit; personal names stay out of the production bundle. Daily typing and alphabet controls are absent; helper editing remains available in settings.
 - All browser flows run again at `/my-words/`; asset paths, manifest and worker scope are verified. The subpath runner restores the root production build afterward.
 
-The manual GitHub Actions workflow is present and inspected but has **not** run on GitHub. It defaults to checks only; publication requires selecting the manual publish input. Repository Pages settings and environment permissions require owner setup.
+The [GitHub Actions deployment](https://github.com/robertchang-ga/my-words/actions/runs/36058787500) passed all 42 unit tests and both 26-test browser suites on Linux. Narrow-screen spacing was adjusted for platform font wrapping while preserving 56px minimum button sizes. The public HTTPS app, manifest scope, offline readiness, and offline reload were verified with Chromium. Future publication requires selecting the manual publish input.
 
 Still required: [physical iPhone checklist](IPHONE-CHECKLIST.md), including Safari and Home Screen launch, left-hand comfort, actual VoiceOver and enlarged text, device voices/cancellation, airplane-mode speech, storage persistence, real photo formats, Files backup restoration and update behavior. Desktop WebKit and iPhone-sized emulation do not prove iPhone speech reliability or native accessibility usability.
+
 
 
