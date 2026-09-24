@@ -1,6 +1,6 @@
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import {
-  categories,
+  getCategories,
   MAX_BACKUP_SIZE,
   mergeData,
   parseBackup,
@@ -11,6 +11,7 @@ import {
 } from "./data";
 import { resizePhoto } from "./photos";
 import { actions } from "./grammar";
+import { CategoryEditor } from "./CategoryEditor";
 
 interface Props {
   data: PersonalData;
@@ -28,6 +29,14 @@ export function SettingsPanel({ data, update, voices, saveStatus }: Props) {
   const [incoming, setIncoming] = useState<PersonalData | null>(null);
   const [undoData, setUndoData] = useState<PersonalData | null>(null);
   const [replaceConfirmed, setReplaceConfirmed] = useState(false);
+  const categories = getCategories(data);
+  useEffect(() => {
+    setWord((current) => {
+      if (getCategories(data).includes(current.category)) return current;
+      const saved = data.words.find((entry) => entry.id === current.id);
+      return { ...current, category: saved?.category ?? "Things" };
+    });
+  }, [data.customCategories, data.words]);
   const languages = Array.from(
     new Set(["en-US", data.settings.language, ...voices.map((v) => v.lang)]),
   ).sort();
@@ -274,6 +283,18 @@ export function SettingsPanel({ data, update, voices, saveStatus }: Props) {
           not.
         </p>
       </section>
+      <CategoryEditor
+        data={data}
+        change={changeData}
+        disabled={busy}
+        renamed={(previous, next) =>
+          setWord((current) =>
+            current.category === previous
+              ? { ...current, category: next }
+              : current,
+          )
+        }
+      />
       <section className="settings-card" aria-labelledby="word-title">
         <h3 id="word-title">Words & personal photos</h3>
         <p>Add, change, or remove words to suit you.</p>
@@ -485,10 +506,10 @@ export function SettingsPanel({ data, update, voices, saveStatus }: Props) {
       <section className="settings-card" aria-labelledby="backup-title">
         <h3 id="backup-title">Backup & restore</h3>
         <p>
-          Your words, settings, and photos are saved in this browser. Clearing
-          website data or the browser removing stored data can erase them. Save
-          a backup regularly, and before switching devices or installing a new
-          copy.
+          Your categories, words, settings, and photos are saved in this
+          browser. Clearing website data or the browser removing stored data can
+          erase them. Save a backup regularly, and before switching devices or
+          installing a new copy.
         </p>
         <button className="primary wide" onClick={download}>
           Download backup
@@ -510,7 +531,8 @@ export function SettingsPanel({ data, update, voices, saveStatus }: Props) {
             <p>
               {incoming.words.length} words · {incoming.favorites.length}{" "}
               favorite phrases · {incoming.words.filter((w) => w.photo).length}{" "}
-              photos
+              photos · {incoming.customCategories?.length ?? 0} custom
+              categories
             </p>
             <p>
               {
@@ -530,13 +552,15 @@ export function SettingsPanel({ data, update, voices, saveStatus }: Props) {
               Merge adds new entries at the end. For matching entries, it keeps
               your current words, photos, and favorites. It also keeps your
               current settings. Separate entries with the same label are kept.
+              Category names that differ only in capitalization use the name
+              already saved here.
             </p>
             <button className="wide" onClick={() => applyImport(true)}>
               Merge backup
             </button>
             <p>
-              Replace removes the current words, photos, favorites, and settings
-              and uses this backup instead.
+              Replace removes the current custom categories, words, photos,
+              favorites, and settings and uses this backup instead.
             </p>
             <label className="check-label">
               <input

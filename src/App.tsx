@@ -4,7 +4,7 @@ import { compose, emptyMessage, type Message } from "./grammar";
 import {
   loadData,
   saveData,
-  categories,
+  getCategories,
   type PersonalData,
   type Category,
   type Word,
@@ -33,7 +33,6 @@ export default function App() {
   const [saveStatus, setSaveStatus] = useState("Loading your words…");
   const [editing, setEditing] = useState(false);
   const [message, setMessage] = useState<Message>(emptyMessage);
-  const [history, setHistory] = useState<Message[]>([]);
   const [cleared, setCleared] = useState<Message | null>(null);
   const [mode, setMode] = useState<Mode>("Build");
   const [step, setStep] = useState<Step>(0);
@@ -50,6 +49,10 @@ export default function App() {
   const saveQueue = useRef(Promise.resolve());
   const pwa = useOffline();
   const spoken = compose(message);
+
+  useEffect(() => {
+    if (category && !getCategories(data).includes(category)) setCategory(null);
+  }, [data.customCategories, category]);
 
   useEffect(() => {
     let alive = true;
@@ -177,7 +180,6 @@ export default function App() {
     speech.stop();
     setHeardWord("");
     setSpeechStatus("");
-    setHistory((old) => [...old.slice(-49), message]);
     setMessage(next);
   };
   const literal = (text: string) => change({ ...emptyMessage(), text });
@@ -192,15 +194,6 @@ export default function App() {
       if (data.settings.tapToHear) setHeardWord(word.label);
     });
     if (data.settings.tapToHear) speech.speak(word.label, data.settings);
-  };
-  const undo = () => {
-    const previous = history.at(-1);
-    if (!previous) return;
-    speech.stop();
-    setHeardWord("");
-    setSpeechStatus("");
-    setMessage(previous);
-    setHistory((old) => old.slice(0, -1));
   };
   const chooseMode = (next: Mode) => {
     setMode(next);
@@ -254,6 +247,18 @@ export default function App() {
             {heardWord ? `Word preview: “${heardWord}”. ` : ""}
             {speechStatus}
           </p>
+        )}
+        {cleared && !spoken && (
+          <button
+            className="restore-message"
+            onClick={() => {
+              change(cleared);
+              setCleared(null);
+              go(3);
+            }}
+          >
+            Restore message
+          </button>
         )}
       </section>
       <main
@@ -314,14 +319,6 @@ export default function App() {
                   <h2 ref={contentRef} tabIndex={-1}>
                     Message
                   </h2>
-                  <button
-                    onClick={() => {
-                      change(emptyMessage());
-                      go(0);
-                    }}
-                  >
-                    New thought
-                  </button>
                 </div>
                 <div className="speech-buttons">
                   <button
@@ -337,40 +334,16 @@ export default function App() {
                   <button disabled={!spoken.trim()} onClick={speak}>
                     Repeat
                   </button>
-                  <button disabled={!history.length} onClick={undo}>
-                    Undo
-                  </button>
-                  <button
-                    disabled={!spoken && !message.negative}
-                    onClick={() => {
-                      setCleared(message);
-                      change(emptyMessage());
-                    }}
-                  >
-                    Clear
-                  </button>
                 </div>
-                {cleared && (
-                  <button
-                    className="wide"
-                    onClick={() => {
-                      change(cleared);
-                      setCleared(null);
-                    }}
-                  >
-                    Restore message
-                  </button>
-                )}
                 {data.settings.encourageSpeech && (
                   <p className="gentle-note">
                     You can try saying it too, if you want.
                   </p>
                 )}
-                <OfflineStatus />
               </section>
             )}
             {mode === "Categories" && (
-              <section>
+              <section className="choice-page">
                 <div className="page-heading">
                   <h2 ref={contentRef} tabIndex={-1}>
                     {category ?? "Categories"}
@@ -399,19 +372,17 @@ export default function App() {
                     )}
                   </>
                 ) : (
-                  <div className="category-grid">
-                    {categories.map((c) => (
-                      <button
-                        key={c}
-                        onClick={() => {
-                          setCategory(c);
-                          focusPage();
-                        }}
-                      >
-                        {c}
-                      </button>
-                    ))}
-                  </div>
+                  <WordChoices
+                    words={getCategories(data).map((c) => ({
+                      id: c,
+                      label: c,
+                      category: c,
+                    }))}
+                    choose={(word) => {
+                      setCategory(word.category);
+                      focusPage();
+                    }}
+                  />
                 )}
               </section>
             )}
@@ -427,7 +398,7 @@ export default function App() {
                     <button
                       key={f.id}
                       onClick={() => {
-                        literal(f.label);
+                        sayShortcut(f.label);
                         go(3);
                       }}
                     >
@@ -440,26 +411,68 @@ export default function App() {
                 )}
               </section>
             )}
+            {pwa.waiting && <OfflineStatus />}
           </>
         )}
       </main>
-      <nav className="quick-bar" aria-label="Quick communication">
-        <button
-          onClick={() => sayShortcut("Yes")}
-          aria-description="Speaks immediately"
-        >
-          Yes
-        </button>
-        <button
-          onClick={() => sayShortcut("No")}
-          aria-description="Speaks immediately"
-        >
-          No
-        </button>
-        <button onClick={() => setShowQuick(true)} aria-haspopup="dialog">
-          Quick words
-        </button>
-      </nav>
+      <footer className="communication-footer">
+        {!editing && (
+          <div className="page-actions">
+            {mode === "Build" && step < 3 ? (
+              <button
+                onClick={() => {
+                  change({
+                    ...message,
+                    text: null,
+                    ...(step === 0
+                      ? { subject: "" }
+                      : step === 1
+                        ? { action: "" }
+                        : { word: null }),
+                  });
+                  go((step + 1) as Step);
+                }}
+              >
+                {["Skip who", "Skip action", "Skip what / where"][step]}
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  if (spoken || message.negative) setCleared(message);
+                  change(emptyMessage());
+                  setCategory(null);
+                  go(0);
+                }}
+              >
+                New thought
+              </button>
+            )}
+          </div>
+        )}
+        <nav className="quick-bar" aria-label="Quick communication">
+          <button
+            onClick={() => sayShortcut("Yes")}
+            aria-description="Speaks immediately"
+          >
+            Yes
+          </button>
+          <button
+            onClick={() => sayShortcut("No")}
+            aria-description="Speaks immediately"
+          >
+            No
+          </button>
+          <button
+            onClick={() => sayShortcut("OK")}
+            aria-description="Speaks immediately"
+          >
+            OK
+          </button>
+          <button onClick={() => setShowQuick(true)} aria-haspopup="dialog">
+            Quick words
+          </button>
+        </nav>
+      </footer>
       <dialog
         ref={quickRef}
         className="quick-dialog"
@@ -512,7 +525,7 @@ export default function App() {
               Update & reopen
             </button>
             {(!!spoken || editing) && (
-              <p>Clear your message on the Message page to update.</p>
+              <p>Finish your message, then choose New thought to update.</p>
             )}
           </div>
         )}

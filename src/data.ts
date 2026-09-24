@@ -8,7 +8,7 @@ export const categories = [
   "Activities",
   "Topics",
 ] as const;
-export type Category = (typeof categories)[number];
+export type Category = string;
 export interface Word {
   id: string;
   label: string;
@@ -28,9 +28,13 @@ export interface Settings {
   encourageSpeech: boolean;
 }
 export interface PersonalData {
+  customCategories?: string[];
   words: Word[];
   favorites: Favorite[];
   settings: Settings;
+}
+export function getCategories(data: PersonalData): string[] {
+  return [...categories, ...(data.customCategories ?? [])];
 }
 export const defaultSettings: Settings = {
   voiceURI: "",
@@ -101,8 +105,34 @@ function photo(value: unknown): string {
   );
   return url;
 }
-function validateData(value: unknown): PersonalData {
-  const data = object(value, ["words", "favorites", "settings"]);
+function validateData(value: unknown, version = 2): PersonalData {
+  const data = object(value, [
+    "words",
+    "favorites",
+    "settings",
+    ...(version === 2 ? ["customCategories"] : []),
+  ]);
+  let customCategories: string[] | undefined;
+  if (data.customCategories !== undefined) {
+    if (
+      !Array.isArray(data.customCategories) ||
+      data.customCategories.length > 50
+    )
+      fail("use at most 50 custom categories.");
+    const seen = new Set<string>(categories.map((name) => name.toLowerCase()));
+    customCategories = data.customCategories.map((value) => {
+      const name = string(value, 60);
+      if (name !== name.trim())
+        fail("category names cannot start or end with spaces.");
+      if (seen.has(name.toLowerCase())) fail("category names must be unique.");
+      seen.add(name.toLowerCase());
+      return name;
+    });
+  }
+  const allowedCategories: string[] = [
+    ...categories,
+    ...(customCategories ?? []),
+  ];
   const settings = object(data.settings, [
     "voiceURI",
     "language",
@@ -123,6 +153,7 @@ function validateData(value: unknown): PersonalData {
   )
     fail("invalid settings.");
   return {
+    ...(customCategories !== undefined ? { customCategories } : {}),
     words: entries(data.words, 500, (value) => {
       const word = object(value, [
         "id",
@@ -131,7 +162,7 @@ function validateData(value: unknown): PersonalData {
         "photo",
         "complements",
       ]);
-      if (!categories.includes(word.category as Category))
+      if (!allowedCategories.includes(word.category as Category))
         fail("unknown category.");
       const result: Word = {
         id: string(word.id, 100),
@@ -179,7 +210,7 @@ function validateData(value: unknown): PersonalData {
 }
 export function serializeBackup(data: PersonalData): string {
   const result = JSON.stringify(
-    { format: "my-words-backup", version: 1, data: validateData(data) },
+    { format: "my-words-backup", version: 2, data: validateData(data) },
     null,
     2,
   );
@@ -195,9 +226,12 @@ export function parseBackup(text: string): PersonalData {
     return fail("not valid JSON.");
   }
   const envelope = object(value, ["format", "version", "data"]);
-  if (envelope.format !== "my-words-backup" || envelope.version !== 1)
+  if (
+    envelope.format !== "my-words-backup" ||
+    (envelope.version !== 1 && envelope.version !== 2)
+  )
     fail("unsupported format or version.");
-  return validateData(envelope.data);
+  return validateData(envelope.data, envelope.version as number);
 }
 export function mergeData(
   existing: PersonalData,
@@ -205,13 +239,33 @@ export function mergeData(
 ): PersonalData {
   const oldData = validateData(existing),
     newData = validateData(incoming);
+  const customCategories = [...(oldData.customCategories ?? [])];
+  const names = new Map(
+    getCategories(oldData).map((name) => [name.toLowerCase(), name]),
+  );
+  for (const name of newData.customCategories ?? []) {
+    if (!names.has(name.toLowerCase())) {
+      names.set(name.toLowerCase(), name);
+      customCategories.push(name);
+    }
+  }
   const append = <T extends { id: string }>(a: T[], b: T[]) => [
     ...a,
     ...b.filter((entry) => !a.some((old) => old.id === entry.id)),
   ];
   return parseBackup(
     serializeBackup({
-      words: append(oldData.words, newData.words),
+      ...(oldData.customCategories !== undefined ||
+      newData.customCategories !== undefined
+        ? { customCategories }
+        : {}),
+      words: append(
+        oldData.words,
+        newData.words.map((word) => ({
+          ...word,
+          category: names.get(word.category.toLowerCase())!,
+        })),
+      ),
       favorites: append(oldData.favorites, newData.favorites),
       settings: oldData.settings,
     }),

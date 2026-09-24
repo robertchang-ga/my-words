@@ -150,6 +150,45 @@ main {
   padding: 2px 2px 2px;
   scroll-padding: 8px;
 }
+.communication {
+  display: flex;
+  flex-direction: column;
+}
+.communication > * {
+  flex-shrink: 0;
+}
+.communication > .builder-page,
+.communication > .choice-page {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.builder-page > *,
+.choice-page > * {
+  flex-shrink: 0;
+}
+.word-choices {
+  flex: 1;
+  min-height: 100px;
+}
+.builder-page > .page-heading {
+  min-height: 32px;
+}
+.communication-footer {
+  min-width: 0;
+}
+.page-actions {
+  display: flex;
+  justify-content: center;
+  padding-top: 4px;
+}
+.page-actions button {
+  min-width: 160px;
+}
+.restore-message {
+  margin-top: 4px;
+}
 .mode-tabs,
 .step-tabs {
   display: grid;
@@ -194,14 +233,18 @@ main {
 }
 .subject-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(56px, 1fr));
   gap: 6px;
+}
+.subject-grid button {
+  padding: 6px 2px;
+  font-size: 0.9rem;
 }
 .negation-choice {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-top: 4px;
+  justify-content: center;
+  margin-bottom: 6px;
 }
 .negation-choice button {
   min-width: 100px;
@@ -230,7 +273,7 @@ main {
   display: flex;
   align-items: center;
   gap: 8px;
-  min-height: 56px;
+  min-height: 72px;
   min-width: 0;
   padding: 8px;
 }
@@ -269,7 +312,7 @@ main {
 }
 .message-tools {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 6px;
   margin-top: 8px;
 }
@@ -290,11 +333,14 @@ main {
 }
 .quick-bar {
   display: grid;
-  grid-template-columns: 1fr 1fr 1.5fr;
-  gap: 8px;
+  grid-template-columns: 1fr 1fr 1fr 1.5fr;
+  gap: 4px;
   border-top: 1px solid var(--line);
   padding: 8px 0 max(8px, env(safe-area-inset-bottom));
   background: #f7f5f0;
+}
+.quick-bar button {
+  padding: 6px 2px;
 }
 .quick-bar button:first-child {
   background: #e4efe4;
@@ -531,7 +577,7 @@ summary {
     grid-column: 2;
     grid-row: 1 / span 2;
   }
-  .quick-bar {
+  .communication-footer {
     grid-column: 1/-1;
     grid-row: 3;
   }

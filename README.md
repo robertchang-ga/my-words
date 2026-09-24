@@ -26,15 +26,15 @@ Build a thought has separate pages for Who, Action, and What/where. Choosing a s
 
 On Who, choose I/me, You, It/that, or Other. Other opens your People choices and Someone else for a person who is not listed. Add people in Edit & settings.
 
-Every step is optional. Use Skip or the numbered step buttons to move between pages. Single words and short phrases work too. The message strip stays visible as you choose words. Not is on the Who page; you can turn it on before choosing any words. It changes the sentence silently.
+Every step is optional. Use Skip or the numbered step buttons to move between pages. Single words and short phrases work too. The message strip stays visible as you choose words. Not is centered above the Who choices; you can turn it on before choosing any words. It changes the sentence silently.
 
-Yes, No, and Quick words stay at the bottom on every screen, including settings. Yes and No display and speak immediately. Quick words opens Wrong / “That’s not what I meant,” Help, Pain, Done, “I want to tell you something,” and “I have a question.” Each speaks when tapped. Wrong shows its full spoken phrase. No says “No”; Not negates your sentence.
+Yes, No, OK, and Quick words stay at the bottom on every screen, including settings. Yes, No, and OK display and speak immediately. Quick words opens Wrong / “That’s not what I meant,” Help, Pain, Done, “I want to tell you something,” and “I have a question.” Each speaks when tapped. Wrong shows its full spoken phrase. No says “No”; Not negates your sentence.
 
-On the Message page, Undo restores the preceding composition step (up to 50). Clear keeps one recoverable message until another clear or the app closes. Restore message brings it back.
+Skip and New thought are centered above the bottom bar. New thought starts an empty message and keeps the previous message available through Restore message while the composition is empty. Closing the app loses this recovery option. Daily communication has no Undo or Clear buttons.
 
-Browse People, Things, Places, Body, Feelings, Activities, or Topics for more choices. Choose “That” while pointing to an object, or “Something else.” Favorites selects a saved complete phrase and waits for Speak.
+Browse People, Things, Places, Body, Feelings, Activities, Topics, or your own categories for more choices. Choose “That” while pointing to an object, or “Something else.” Tapping a favorite displays and speaks the saved complete phrase immediately.
 
-Subject and action buttons stay in the same order. The app never ranks words by usage. The starting vocabulary is editable and carries no clinical or frequency-based recommendation.
+Subject and action buttons stay in the same order. Word and category pages fit as many choices as the available width and height allow, with paging for the rest. Choice order stays stable; the app never ranks words by usage. The starting vocabulary is editable and carries no clinical or frequency-based recommendation.
 
 ## Sentence rules
 
@@ -62,6 +62,8 @@ The speech controller follows the browser's [cancellation API](https://developer
 
 Use **Edit & settings** to add/edit/remove words and favorites, set word categories, and add photos. Daily communication uses word and phrase buttons. Text entry is available only in Edit & settings for a helper to maintain words and phrases. One personalization change can be undone while the editor remains open. Settings changes save when selected; word and phrase edits save with their Save buttons.
 
+The Categories editor adds or renames custom categories. Renaming a category updates its words too. You can remove a custom category once it has no words; move or remove its words first. Built-in categories stay in place. You can add up to 50 custom categories, with names up to 60 characters. Category names must be unique, ignoring capitalization.
+
 Data lives in IndexedDB in this browser/origin. There are no accounts, analytics, ads, remote AI, paid APIs, or app-controlled data uploads. The conversation itself is kept only in memory and is lost on reload/close. Personalization saving is queued and atomic; a visible error warns if saving fails, while communication remains usable. Changes in two simultaneously open app tabs are not synchronized; use one app window when editing.
 
 **Clearing website data, browser storage eviction, changing the URL/origin, or losing the device can erase personalization.** Safari and the Home Screen copy may not share data in every iOS version/context. Back up before switching and verify the target copy.
@@ -69,10 +71,10 @@ Data lives in IndexedDB in this browser/origin. There are no accounts, analytics
 1. Finish any word/phrase edits with **Save**.
 2. Tap **Download backup**, then save the JSON file to a private location in Files. Verify that the download exists.
 3. To restore, select **Import backup file**. The app validates the file before offering a preview.
-4. **Merge backup** appends new IDs, keeping current words/photos/favorites/settings for conflicting IDs. Labels with different IDs are retained separately.
+4. **Merge backup** appends new IDs, keeping current words/photos/favorites/settings for conflicting IDs. Labels with different IDs are retained separately. Category names that differ only in capitalization merge under the spelling already saved here.
 5. **Replace with backup** requires acknowledging that the current personalization will be replaced. It restores the backup settings too. You can undo the import while the editor remains open.
 
-The version-1 backup contains settings, vocabulary, favorites and embedded photos. Conversations are excluded. Limits: 20 MiB UTF-8 JSON, 500 words, 100 favorites, 120-character word labels and 500-character favorite phrases. Unknown versions, unexpected fields, duplicate IDs, invalid settings, unsafe photo URLs and malformed image headers are rejected. Imported text is rendered as text, never HTML. Photos are rasterized locally to JPEG, at most 640px on the longest side, with metadata removed. Upload JPEG/PNG/WebP up to 12 MiB; export HEIC to JPEG first. Imports require bounded raster photos. Large/unsupported photos fail with an explanation.
+Version-2 backups contain custom categories, settings, vocabulary, favorites and embedded photos. Version-1 backups can still be imported. Conversations are excluded. Limits: 20 MiB UTF-8 JSON, 500 words, 100 favorites, 50 custom categories, 60-character category names, 120-character word labels and 500-character favorite phrases. Unknown versions, unexpected fields, duplicate IDs or category names, unknown category references, invalid settings, unsafe photo URLs and malformed image headers are rejected. Imported text is rendered as text, never HTML. Photos are rasterized locally to JPEG, at most 640px on the longest side, with metadata removed. Upload JPEG/PNG/WebP up to 12 MiB; export HEIC to JPEG first. Imports require bounded raster photos. Large/unsupported photos fail with an explanation.
 
 For local setup, the app applies the ignored `personal/startup.json` once on localhost. This file is excluded from `dist`. A private portable backup is stored outside the workspace. On a public installation, use Import backup file to load it. Source files contain no personal names.
 

@@ -82,7 +82,7 @@ test("shortcuts speak immediately while sentence negation stays silent", async (
   ).toHaveLength(5);
 });
 
-test("build, negate, speak, undo, clear and recover at phone size", async ({
+test("build, negate, start a new thought and recover at phone size", async ({
   page,
 }) => {
   await page.goto("./");
@@ -96,13 +96,13 @@ test("build, negate, speak, undo, clear and recover at phone size", async ({
     "I don’t want my phone.",
   );
   await page.getByRole("button", { name: "Message", exact: true }).click();
-  await page.getByRole("button", { name: "Undo", exact: true }).click();
-  await expect(page.getByTestId("message")).toHaveText("I want my phone.");
-  await page.getByRole("button", { name: "Clear", exact: true }).click();
+  await page.getByRole("button", { name: "New thought", exact: true }).click();
   await page
     .getByRole("button", { name: "Restore message", exact: true })
     .click();
-  await expect(page.getByTestId("message")).toHaveText("I want my phone.");
+  await expect(page.getByTestId("message")).toHaveText(
+    "I don’t want my phone.",
+  );
   await page.getByRole("button", { name: "No", exact: true }).click();
   await expect(page.getByTestId("message")).toHaveText("No");
 });
@@ -110,6 +110,10 @@ test("build, negate, speak, undo, clear and recover at phone size", async ({
 test("categories and skipped steps", async ({ page }) => {
   await page.goto("./");
   await page.getByRole("button", { name: "Categories", exact: true }).click();
+  while (
+    !(await page.getByRole("button", { name: "Topics", exact: true }).count())
+  )
+    await page.getByRole("button", { name: "More words", exact: true }).click();
   await page.getByRole("button", { name: "Topics", exact: true }).click();
   await page
     .getByRole("button", { name: "something that happened", exact: true })
@@ -326,7 +330,11 @@ test("updates wait for an explicit action with an empty message", async ({
     await expect(update).toBeDisabled();
     await expect(page.getByTestId("message")).toHaveText("I want.");
     await page.getByRole("button", { name: "Message", exact: true }).click();
-    await page.getByRole("button", { name: "Clear", exact: true }).click();
+    await page
+      .getByRole("button", { name: "New thought", exact: true })
+      .click();
+    await expect(update).toBeVisible();
+    await expect(update).toBeEnabled();
     await update.click();
     await expect(
       page.getByRole("button", { name: "Restore message", exact: true }),

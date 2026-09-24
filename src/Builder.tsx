@@ -64,19 +64,23 @@ export function Builder({
         <h2 ref={heading} tabIndex={-1}>
           {["Who", "Action", "What / where"][step]}
         </h2>
-        <button
-          onClick={() => {
-            if (step === 0) change({ ...message, subject: "", text: null });
-            if (step === 1) change({ ...message, action: "", text: null });
-            if (step === 2) change({ ...message, word: null, text: null });
-            go((step + 1) as Step);
-          }}
-        >
-          {["Skip who", "Skip action", "Skip what / where"][step]}
-        </button>
       </div>
       {step === 0 && (
         <>
+          <div className="negation-choice">
+            <button
+              aria-pressed={message.negative}
+              aria-describedby="negation-help"
+              onClick={() =>
+                change({ ...message, negative: !message.negative })
+              }
+            >
+              Not
+            </button>
+            <span id="negation-help" className="sr-only">
+              Make this a negative sentence.
+            </span>
+          </div>
           <div className="subject-grid">
             {(
               [
@@ -110,17 +114,6 @@ export function Builder({
             >
               Other
             </button>
-          </div>
-          <div className="negation-choice">
-            <button
-              aria-pressed={message.negative}
-              onClick={() =>
-                change({ ...message, negative: !message.negative })
-              }
-            >
-              Not
-            </button>
-            <p>Make this a negative sentence.</p>
           </div>
         </>
       )}

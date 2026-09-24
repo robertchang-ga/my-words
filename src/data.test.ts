@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { IDBFactory } from "fake-indexeddb";
 import {
   defaultSettings,
+  categories,
+  getCategories,
   loadData,
   mergeData,
   parseBackup,
@@ -50,7 +52,7 @@ describe("validated backup", () => {
     for (const text of [
       "bad json",
       "{}",
-      backup(sample(), 2),
+      backup(sample(), 3),
       backup({}),
       " ".repeat(20 * 1024 * 1024 + 1),
     ])
@@ -112,6 +114,53 @@ describe("validated backup", () => {
       "é".repeat(11 * 1024 * 1024),
     );
     expect(() => parseBackup(text)).toThrow(/20 MiB/);
+  });
+});
+
+describe("custom categories", () => {
+  it("exports version 2 and accepts existing version 1 backups", () => {
+    expect(JSON.parse(serializeBackup(sample())).version).toBe(2);
+    expect(parseBackup(backup(sample(), 1))).toEqual(sample());
+  });
+  it("round trips custom categories, including empty categories", async () => {
+    globalThis.indexedDB = new IDBFactory();
+    const data = { ...sample(), customCategories: ["Music", "Garden"] };
+    data.words.push({ id: "music", label: "Jazz", category: "Music" });
+    expect(getCategories(data)).toEqual([...categories, "Music", "Garden"]);
+    expect(parseBackup(serializeBackup(data))).toEqual(data);
+    await saveData(data);
+    expect(await loadData()).toEqual(data);
+  });
+  it("rejects invalid category names and unknown word references", () => {
+    for (const customCategories of [
+      [" "],
+      ["x".repeat(61)],
+      ["Music", "music"],
+      ["people"],
+      [" Music"],
+      Array.from({ length: 51 }, (_, i) => `Category ${i}`),
+    ]) {
+      expect(() =>
+        parseBackup(backup({ ...sample(), customCategories }, 2)),
+      ).toThrow();
+    }
+    const unknown = sample();
+    unknown.words[0].category = "Unknown";
+    expect(() => parseBackup(backup(unknown, 2))).toThrow(/category/);
+    expect(() =>
+      parseBackup(backup({ ...sample(), customCategories: ["Music"] }, 1)),
+    ).toThrow();
+  });
+  it("merges category names without case-only duplicates and remaps incoming words", () => {
+    const existing = { ...sample(), customCategories: ["Music"] };
+    const incoming = { ...sample(), customCategories: ["music", "Garden"] };
+    incoming.words[0].label = "Changed";
+    incoming.words.push({ id: "new", label: "Jazz", category: "music" });
+    const merged = mergeData(existing, incoming);
+    expect(merged.customCategories).toEqual(["Music", "Garden"]);
+    expect(merged.words[1].category).toBe("Music");
+    expect(merged.words[0]).toEqual(existing.words[0]);
+    expect(merged.settings).toEqual(existing.settings);
   });
 });
 

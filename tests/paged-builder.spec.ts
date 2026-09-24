@@ -8,7 +8,7 @@ test.beforeEach(async ({ page }) => {
 
 async function visibleDock(page: Page) {
   const dock = page.getByRole("navigation", { name: "Quick communication" });
-  for (const name of ["Yes", "No", "Quick words"])
+  for (const name of ["Yes", "No", "OK", "Quick words"])
     await expect(
       dock.getByRole("button", { name, exact: true }),
     ).toBeInViewport({ ratio: 1 });
@@ -49,7 +49,7 @@ test("separate choice pages, silent first-page Not and final message controls", 
   await expect(page.getByTestId("message")).toHaveText(
     "I don’t want my phone.",
   );
-  for (const name of ["Speak", "Repeat", "Stop speaking", "Undo", "Clear"])
+  for (const name of ["Speak", "Repeat", "Stop speaking", "New thought"])
     await expect(
       page.getByRole("button", { name, exact: true }),
     ).toBeInViewport({ ratio: 1 });
@@ -156,13 +156,22 @@ test("Other selects a saved person or someone else without typing", async ({
     .getByRole("button", { name: "Back to talking", exact: true })
     .click();
   await page.getByRole("button", { name: "Other", exact: true }).click();
+  while (
+    !(await page.getByRole("button", { name: "Alex", exact: true }).count())
+  )
+    await page.getByRole("button", { name: "More words", exact: true }).click();
   await page.getByRole("button", { name: "Alex", exact: true }).click();
   await page.getByRole("button", { name: "Feel", exact: true }).click();
   await page.getByRole("button", { name: "tired", exact: true }).click();
   await expect(page.getByTestId("message")).toHaveText("Alex feels tired.");
   await page.getByRole("button", { name: "1 Who", exact: true }).click();
   await page.getByRole("button", { name: "Other", exact: true }).click();
-  await page.getByRole("button", { name: "More words", exact: true }).click();
+  while (
+    !(await page
+      .getByRole("button", { name: "Someone else", exact: true })
+      .count())
+  )
+    await page.getByRole("button", { name: "More words", exact: true }).click();
   await page.getByRole("button", { name: "Someone else", exact: true }).click();
   await expect(page.getByTestId("message")).toHaveText(
     "Someone else feels tired.",
