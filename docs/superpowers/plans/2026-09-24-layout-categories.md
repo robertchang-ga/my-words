@@ -6,8 +6,9 @@ Custom categories belong in helper settings. Add, rename, and remove empty custo
 
 React/TypeScript components keep local state; IndexedDB and export/import remain local. No new service or dependency is needed.
 
-- [ ] Add failing storage tests for categories, version migration, merge conflicts, and validation. Implement in `src/data.ts` and settings category editor. Verify with Vitest.
-- [ ] Add browser expectations for immediate OK speech, navigation position, silent centered Not, New thought recovery, and adaptive choices. Implement in `App.tsx`, `Builder.tsx`, `WordChoices.tsx`, and `styles.css`.
-- [ ] Update existing tests for the removed daily controls. Exercise category creation, rename, persistence, backup, and word selection through the UI.
-- [ ] Run build, unit tests, root/subpath Chromium and WebKit flows, layout and accessibility checks. Review the changes and document remaining physical iPhone checks.
-- [ ] Publish the tested update through the existing manual Pages workflow and verify the live site.
+- [x] Add failing storage tests for categories, version migration, merge conflicts, and validation. Implement in `src/data.ts` and settings category editor. Verify with Vitest.
+- [x] Add browser expectations for immediate OK speech, navigation position, silent centered Not, New thought recovery, and adaptive choices. Implement in `App.tsx`, `Builder.tsx`, `WordChoices.tsx`, and `styles.css`.
+- [x] Update existing tests for the removed daily controls. Exercise category creation, rename, persistence, backup, and word selection through the UI.
+- [x] Run build, unit tests, root/subpath Chromium and WebKit flows, layout and accessibility checks. Review the changes and document remaining physical iPhone checks.
+- [x] Publish the tested update through the existing manual Pages workflow and verify the live site.
+
