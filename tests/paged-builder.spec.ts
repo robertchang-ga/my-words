@@ -101,12 +101,17 @@ test("phone pages fit without document scrolling and shortcuts remain in setting
           () => document.documentElement.scrollWidth <= innerWidth,
         ),
       ).toBe(true);
-      if (size.width <= 390)
-        expect(
-          await page
-            .locator("main")
-            .evaluate((el) => el.scrollHeight <= el.clientHeight + 1),
-        ).toBe(true);
+      if (size.width <= 390) {
+        const layout = await page.locator("main").evaluate((el) => ({
+          scroll: el.scrollHeight,
+          height: el.clientHeight,
+          sections: Array.from(document.querySelectorAll(".app-header, .message-panel, main > *, .quick-bar")).map((node) => ({
+            text: node.textContent,
+            height: node.getBoundingClientRect().height,
+          })),
+        }));
+        expect(layout.scroll, JSON.stringify({ size, name, layout })).toBeLessThanOrEqual(layout.height + 1);
+      }
     }
   }
   await page.setViewportSize({ width: 390, height: 844 });
