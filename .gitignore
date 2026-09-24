@@ -1,0 +1,14 @@
+node_modules/
+dist/
+test-results/
+playwright-report/
+*.local
+.env*
+backups/
+personal/
+my-words-backup*.json
+*.heic
+*.jpg
+*.jpeg
+*.tsbuildinfo
+# Only generated app icons belong in this repository.

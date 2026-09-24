@@ -1,0 +1,35 @@
+{
+  "name": "speech-assistant",
+  "version": "1.0.0",
+  "description": "Private iPhone-first everyday communication PWA",
+  "scripts": {
+    "test": "vitest run",
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test:e2e": "playwright test",
+    "check": "tsc --noEmit",
+    "test:subpath": "node scripts/test-subpath.mjs",
+    "format": "prettier --write src tests scripts/*.mjs *.ts *.json *.html .github/workflows/*.yml"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "fake-indexeddb": "^6.2.5",
+    "prettier": "^3.9.9",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1",
+    "vitest": "^5.0.1"
+  },
+  "type": "module",
+  "private": true
+}

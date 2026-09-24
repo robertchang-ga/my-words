@@ -1,0 +1,65 @@
+name: Check and optionally publish My Words
+
+# No push trigger: publication requires an explicit manual action.
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish the tested app to GitHub Pages
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm test
+      - run: npm run build
+      - run: npm run test:e2e
+      - run: npm run test:subpath
+      - name: Configure Pages
+        if: inputs.publish
+        id: pages
+        uses: actions/configure-pages@v5
+      - name: Build for the actual Pages address
+        if: inputs.publish
+        env:
+          PAGE_BASE: ${{ steps.pages.outputs.base_path }}
+        run: |
+          export BASE_PATH="${PAGE_BASE%/}/"
+          npm run build
+      - name: Upload site artifact
+        if: inputs.publish
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    if: inputs.publish
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

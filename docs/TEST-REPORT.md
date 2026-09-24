@@ -1,0 +1,30 @@
+# Validation report
+
+Tested locally on Windows on September 24, 2026, with Node 22.18.0. No external deployment or physical iPhone testing was performed.
+
+| Check | Result |
+| --- | --- |
+| TypeScript + Vite production build | Passed |
+| Vitest | 42 tests passed in 7 files |
+| Root-hosted browser suite | 26 passed: 13 Chromium + 13 WebKit |
+| `/my-words/` subpath browser suite | 26 passed: 13 Chromium + 13 WebKit |
+| axe WCAG 2 A/AA and 2.1 AA checks | No violations on tested communication and settings screens |
+| Dependency audit during installation | No known vulnerabilities reported |
+
+Automated coverage includes:
+
+- Required grammar examples; deterministic negation; skipped subjects/actions/objects; single words; custom words; literal user text and explicit `Not:` fallback.
+- Speech mocks verify explicit initiation, replacing queued speech, cancellation, stale callbacks, missing/delayed voices, unsupported browsers, platform exceptions and utterance errors. Browser mocks verify immediate Yes/No/Wrong speech, silent Not, Speak/Repeat and Stop status. Actual audio output is not verified.
+- IndexedDB save/load, atomic rejection of invalid data, missing storage, versioned backup/photo round trips, duplicate IDs, merge conflicts, file/count/text/rate bounds and unsafe URLs/keys. Raster structural tests cover truncated images, PNG CRC/chunks, JPEG framing, WebP dimensions and pre-decode upload dimension limits. Structural validation is not a full compressed-pixel decoder.
+- Browser flows cover sentence composition, undo/clear/recovery, categories and back, topics, separate builder pages, silent Not before selection, Other and saved people, favorites, custom word persistence after reload, backup download/import preview, local photo resizing, safe text rendering and invalid-import rejection.
+- 390×844 and 320×568 builder pages without scrolling at normal text size; 844×390 overflow checks; minimum 56px button boxes; 200% text; actual keyboard focus hit-testing; landscape shortcut reachability. Portrait and landscape screenshots were visually inspected during development.
+- Both engines load the app after the real origin server is shut down. Chromium additionally uses offline emulation. Tests repair a partially missing asset cache while connected, then confirm offline navigation, manifest scope and communication. Stopping the real server avoids WebKit's `setOffline` navigation issue.
+- A changed real service worker waits while a message is composed. Update is disabled until the message is cleared, then an explicit action activates/reopens. Initial installation does not incorrectly show an update prompt.
+- Local setup tests verify localhost-only loading, validated persistence, once-only application, and save failure recovery. Private setup was also checked in Chromium and WebKit; personal names stay out of the production bundle. Daily typing and alphabet controls are absent; helper editing remains available in settings.
+- All browser flows run again at `/my-words/`; asset paths, manifest and worker scope are verified. The subpath runner restores the root production build afterward.
+
+The manual GitHub Actions workflow is present and inspected but has **not** run on GitHub. It defaults to checks only; publication requires selecting the manual publish input. Repository Pages settings and environment permissions require owner setup.
+
+Still required: [physical iPhone checklist](IPHONE-CHECKLIST.md), including Safari and Home Screen launch, left-hand comfort, actual VoiceOver and enlarged text, device voices/cancellation, airplane-mode speech, storage persistence, real photo formats, Files backup restoration and update behavior. Desktop WebKit and iPhone-sized emulation do not prove iPhone speech reliability or native accessibility usability.
+
+
