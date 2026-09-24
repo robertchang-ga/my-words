@@ -500,6 +500,15 @@ summary {
   padding: 14px;
   margin-top: 16px;
 }
+/* Leave room for platform font wrapping on the smallest phones. */
+@media (max-width: 360px) {
+  .app-shell {
+    gap: 2px;
+  }
+  .message-panel {
+    padding-block: 6px;
+  }
+}
 @media (min-width: 680px) and (max-height: 500px) {
   .app-shell {
     grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
